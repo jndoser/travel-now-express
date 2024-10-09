@@ -17,16 +17,12 @@ model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   firstName String
   lastName String
-  sex String
-  age Int
-  address String
-  phoneNumber String
+  clerkId String
   email String @unique
-  username String @unique
-  password String
-  avatar String?
+  photo String?
   bio String?
   role String
+  isRejected Boolean
   feedbacks Feedback[]
   rooms Room[]
 }
