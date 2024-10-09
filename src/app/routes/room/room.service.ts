@@ -3,26 +3,28 @@ import HttpException from "../../models/http-exception.model";
 import { CreateRoomType, UpdateRoomType } from "./room.model";
 
 export const createRoom = async (room: CreateRoomType) => {
-  const { id } = await prisma.room.create({
-    data: {
-      title: room.title,
-      description: room.description,
-      address: room.address,
-      capacity: room.capacity,
-      price: room.price,
-      imageUrls: room.imageUrls,
-      status: "in progress",
-      owner: {
-        connect: {
-          id: room.ownerId,
+  try {
+    const user = await prisma.user.findFirst({
+      where: { clerkId: room.ownerId },
+    });
+    if (user) {
+      const { id } = await prisma.room.create({
+        data: {
+          title: room.title,
+          description: room.description,
+          address: room.address,
+          capacity: room.capacity,
+          price: room.price,
+          imageUrls: room.imageUrls,
+          status: "in progress",
+          ownerId: user.id,
         },
-      },
-      services: {
-        connect: room.serviceIds.map((item: string) => ({ id: item })),
-      },
-    },
-  });
-  return id;
+      });
+      return id;
+    }
+  } catch (error: any) {
+    console.log(error);
+  }
 };
 
 export const getRooms = async () => {
