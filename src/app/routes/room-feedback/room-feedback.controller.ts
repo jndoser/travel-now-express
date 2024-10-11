@@ -22,7 +22,7 @@ router.get("/room-feedbacks/:roomId", async (req: Request, res: Response) => {
 
 router.post("/room-feedbacks", async (req: Request, res: Response) => {
   const newFeedback = await createFeedback({ ...req.body });
-  res.json(newFeedback);
+  res.status(201).json(newFeedback);
 });
 
 export default router;

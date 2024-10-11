@@ -1,6 +1,6 @@
 export interface CreateFeedbackType {
   roomId: string;
-  authorId: string;
+  clerkId: string;
   rating: number;
   comment: string;
 }

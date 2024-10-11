@@ -8,16 +8,21 @@ import {
 export const createFeedback = async (
   createFeedbackData: CreateFeedbackType
 ) => {
-  const newFeedback = await prisma.feedback.create({
-    data: {
-      roomId: createFeedbackData.roomId,
-      authorId: createFeedbackData.authorId,
-      rating: createFeedbackData.rating,
-      comment: createFeedbackData.comment,
-    },
+  const user = await prisma.user.findFirst({
+    where: { clerkId: createFeedbackData.clerkId },
   });
+  if (user) {
+    const newFeedback = await prisma.feedback.create({
+      data: {
+        roomId: createFeedbackData.roomId,
+        authorId: user.id,
+        rating: createFeedbackData.rating,
+        comment: createFeedbackData.comment,
+      },
+    });
 
-  return newFeedback;
+    return newFeedback;
+  }
 };
 
 export const getFeedbackFromRoom = async (
