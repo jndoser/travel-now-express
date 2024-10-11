@@ -6,13 +6,14 @@ import {
   getRooms,
   updateRoom,
 } from "./room.service";
+import { GetRoomType } from "./room.model";
 
 const router = Router();
 
 router.post("/room", async (req: Request, res: Response) => {
   try {
     const id = await createRoom({ ...req.body });
-    res.json(id);
+    res.status(201).json(id);
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
   }
@@ -20,9 +21,26 @@ router.post("/room", async (req: Request, res: Response) => {
 
 router.get("/room", async (req: Request, res: Response) => {
   try {
-    const rooms = await getRooms();
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 6;
+    const searchKeywords = req.query.searchKeywords as string;
+    const userId = req.query.userId as string;
+
+    const isRejectedParam = req.query.isRejected as string;
+    const isRejected = isRejectedParam === "true";
+
+    const getRoomData = {
+      page,
+      limit,
+      searchKeywords,
+      userId,
+      isRejected,
+    } as GetRoomType;
+
+    const rooms = await getRooms(getRoomData);
     res.json(rooms);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Something went wrong" });
   }
 });

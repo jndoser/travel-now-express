@@ -1,3 +1,11 @@
+export interface GetRoomType {
+  page: number;
+  limit: number;
+  searchKeywords: string | undefined;
+  userId: string | undefined;
+  isRejected: boolean;
+}
+
 export interface CreateRoomType {
   title: string;
   description: string;
@@ -15,7 +23,7 @@ export interface UpdateRoomType {
   address?: string;
   capacity?: number;
   price?: number;
-  imageUrls?: string[]
+  imageUrls?: string[];
   ownerId?: string;
   serviceIDs?: string[];
 }

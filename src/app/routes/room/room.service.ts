@@ -1,6 +1,6 @@
 import prisma from "../../../prisma/prisma-client";
 import HttpException from "../../models/http-exception.model";
-import { CreateRoomType, UpdateRoomType } from "./room.model";
+import { CreateRoomType, GetRoomType, UpdateRoomType } from "./room.model";
 
 export const createRoom = async (room: CreateRoomType) => {
   try {
@@ -27,11 +27,28 @@ export const createRoom = async (room: CreateRoomType) => {
   }
 };
 
-export const getRooms = async () => {
-  const rooms = await prisma.room.findMany({
-    include: { feedback: { select: { rating: true } } },
-  });
-  return rooms;
+export const getRooms = async (getRoomData: GetRoomType) => {
+  try {
+    const skip = (getRoomData.page - 1) * getRoomData.limit;
+
+    const rooms = await prisma.room.findMany({
+      where: {
+        ...(getRoomData.userId ? { ownerId: getRoomData.userId } : {}),
+        ...(getRoomData.searchKeywords
+          ? { title: { contains: getRoomData.searchKeywords } }
+          : {}),
+      },
+      skip,
+      take: getRoomData.limit,
+      include: { feedback: { select: { rating: true } } },
+    });
+
+    const totalRoom = (await prisma.room.findMany({})).length;
+
+    return { rooms, total: totalRoom };
+  } catch (error: any) {
+    console.log(error);
+  }
 };
 
 export const getRoomById = async (id: string) => {
