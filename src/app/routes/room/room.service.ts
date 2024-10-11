@@ -18,6 +18,7 @@ export const createRoom = async (room: CreateRoomType) => {
           imageUrls: room.imageUrls,
           status: "in progress",
           ownerId: user.id,
+          serviceIDs: room.serviceIds
         },
       });
       return id;
@@ -52,29 +53,33 @@ export const getRooms = async (getRoomData: GetRoomType) => {
 };
 
 export const getRoomById = async (id: string) => {
-  const room = await prisma.room.findFirst({
-    where: {
-      id,
-    },
-    include: {
-      feedback: {
-        include: {
-          author: {
-            select: {
-              firstName: true,
-              lastName: true,
+  try {
+    const room = await prisma.room.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        feedback: {
+          include: {
+            author: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
             },
           },
         },
+        owner: true,
+        services: true,
       },
-      owner: true,
-      services: true,
-    },
-  });
-  if (!room) {
-    throw new HttpException(404, "Not found this room");
+    });
+    if (!room) {
+      throw new HttpException(404, "Not found this room");
+    }
+    return room;
+  } catch (err: any) {
+    console.log(err);
   }
-  return room;
 };
 
 export const updateRoom = async (

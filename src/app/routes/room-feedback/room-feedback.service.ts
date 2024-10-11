@@ -1,6 +1,9 @@
 import prisma from "../../../prisma/prisma-client";
 import HttpException from "../../models/http-exception.model";
-import { CreateFeedbackType } from "./room-feedback.model";
+import {
+  CreateFeedbackType,
+  GetFeedbacksByRoomType,
+} from "./room-feedback.model";
 
 export const createFeedback = async (
   createFeedbackData: CreateFeedbackType
@@ -17,19 +20,43 @@ export const createFeedback = async (
   return newFeedback;
 };
 
-export const getFeedbackFromRoom = async (roomId: string) => {
+export const getFeedbackFromRoom = async (
+  getFeedbacksByRoomData: GetFeedbacksByRoomType
+) => {
   const room = await prisma.room.findUnique({
     where: {
-      id: roomId,
+      id: getFeedbacksByRoomData.roomId,
     },
   });
   if (!room) {
     throw new HttpException(404, "This room is not exist");
   }
+  const skip = (getFeedbacksByRoomData.page - 1) * getFeedbacksByRoomData.limit;
+
   const feedbacks = await prisma.feedback.findMany({
     where: {
-      roomId,
+      roomId: getFeedbacksByRoomData.roomId,
     },
+    include: {
+      author: {
+        select: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+    skip,
+    take: getFeedbacksByRoomData.limit,
+    orderBy: { createdAt: "desc" },
   });
-  return feedbacks;
+
+  const total = (
+    await prisma.feedback.findMany({
+      where: {
+        roomId: getFeedbacksByRoomData.roomId,
+      },
+    })
+  ).length;
+
+  return { feedbacks, total };
 };
