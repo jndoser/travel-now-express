@@ -27,3 +27,13 @@ export interface UpdateRoomType {
   ownerId?: string;
   serviceIDs?: string[];
 }
+
+export interface SavedRoomType {
+  roomId: string;
+  clerkId: string;
+}
+
+export interface UnsavedRoomType {
+  roomId: string;
+  clerkId: string;
+}

@@ -1,6 +1,12 @@
 import prisma from "../../../prisma/prisma-client";
 import HttpException from "../../models/http-exception.model";
-import { CreateRoomType, GetRoomType, UpdateRoomType } from "./room.model";
+import {
+  CreateRoomType,
+  GetRoomType,
+  SavedRoomType,
+  UnsavedRoomType,
+  UpdateRoomType,
+} from "./room.model";
 
 export const createRoom = async (room: CreateRoomType) => {
   try {
@@ -18,7 +24,7 @@ export const createRoom = async (room: CreateRoomType) => {
           imageUrls: room.imageUrls,
           status: "in progress",
           ownerId: user.id,
-          serviceIDs: room.serviceIds
+          serviceIDs: room.serviceIds,
         },
       });
       return id;
@@ -69,6 +75,7 @@ export const getRoomById = async (id: string) => {
             },
           },
         },
+        savedUsers: true,
         owner: true,
         services: true,
       },
@@ -145,4 +152,52 @@ export const deleteRoom = async (id: string) => {
     },
   });
   return roomId;
+};
+
+export const saveRoom = async (savedRoomData: SavedRoomType) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      clerkId: savedRoomData.clerkId,
+    },
+  });
+
+  if (user) {
+    const savedRoom = await prisma.room.update({
+      where: {
+        id: savedRoomData.roomId,
+      },
+      data: {
+        savedUsers: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+    });
+    return savedRoom;
+  }
+};
+
+export const unsaveRoom = async (unsavedRoomData: UnsavedRoomType) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      clerkId: unsavedRoomData.clerkId,
+    },
+  });
+
+  if (user) {
+    const updatedRoom = await prisma.room.update({
+      where: {
+        id: unsavedRoomData.roomId,
+      },
+      data: {
+        savedUsers: {
+          disconnect: {
+            id: user.id,
+          },
+        },
+      },
+    });
+    return updatedRoom;
+  }
 };

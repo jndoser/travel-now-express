@@ -25,6 +25,8 @@ model User {
   isRejected Boolean
   feedbacks Feedback[]
   rooms Room[]
+  savedRoomIds String[] @db.ObjectId
+  savedRooms Room[] @relation("room-saving", fields: [savedRoomIds], references: [id])
 }
 
 model Room {
@@ -41,6 +43,8 @@ model Room {
   feedback Feedback[]
   ownerId String @db.ObjectId
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  savedUserIds String[] @db.ObjectId
+  savedUsers User[] @relation("room-saving", fields: [savedUserIds], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }

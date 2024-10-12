@@ -4,6 +4,8 @@ import {
   deleteRoom,
   getRoomById,
   getRooms,
+  saveRoom,
+  unsaveRoom,
   updateRoom,
 } from "./room.service";
 import { GetRoomType } from "./room.model";
@@ -70,6 +72,22 @@ router.delete("/room/:roomId", async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(error.errorCode).json({ message: error.message });
   }
+});
+
+router.put("/room/save/:roomId", async (req: Request, res: Response) => {
+  const savedRoom = await saveRoom({
+    roomId: req.params.roomId,
+    clerkId: req.body.clerkId,
+  });
+  res.status(200).json(savedRoom);
+});
+
+router.put("/room/unsave/:roomId", async (req: Request, res: Response) => {
+  const unsavedRoom = await unsaveRoom({
+    roomId: req.params.roomId,
+    clerkId: req.body.clerkId,
+  });
+  res.status(200).json(unsavedRoom);
 });
 
 export default router;
