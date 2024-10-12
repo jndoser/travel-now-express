@@ -47,7 +47,10 @@ export const getRooms = async (getRoomData: GetRoomType) => {
       },
       skip,
       take: getRoomData.limit,
-      include: { feedback: { select: { rating: true } } },
+      include: {
+        feedback: { select: { rating: true } },
+        savedUsers: { select: { id: true, clerkId: true } },
+      },
     });
 
     const totalRoom = (await prisma.room.findMany({})).length;
