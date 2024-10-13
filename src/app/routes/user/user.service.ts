@@ -1,20 +1,43 @@
 import prisma from "../../../prisma/prisma-client";
+import { GetSavedRoomType } from "./user.model";
 
-export const getSavedRoomsByUser = async (clerkId: string) => {
+export const getSavedRoomsByUser = async (
+  getSavedRoomData: GetSavedRoomType
+) => {
   const user = await prisma.user.findFirst({
     where: {
-      clerkId,
+      clerkId: getSavedRoomData.clerkId,
     },
   });
   if (user) {
-    const savedRooms = await prisma.user.findMany({
+    const skip = (getSavedRoomData.page - 1) * getSavedRoomData.limit;
+    const userWithSavedRoom = await prisma.user.findFirst({
       where: {
         id: user.id,
       },
       select: {
-        savedRooms: true,
+        savedRooms: {
+          include: {
+            feedback: { select: { rating: true } },
+            savedUsers: { select: { id: true, clerkId: true } },
+          },
+          skip,
+          take: getSavedRoomData.limit,
+        },
       },
     });
-    return savedRooms;
+
+    const total = (
+      await prisma.user.findFirst({
+        where: {
+          id: user.id,
+        },
+        select: {
+          savedRooms: true,
+        },
+      })
+    )?.savedRooms.length;
+
+    return { ...userWithSavedRoom, total };
   }
 };
