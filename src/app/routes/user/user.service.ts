@@ -41,3 +41,13 @@ export const getSavedRoomsByUser = async (
     return { ...userWithSavedRoom, total };
   }
 };
+
+export const getUserInfoByClerkId = async (clerkId: string) => {
+  const userInfo = await prisma.user.findFirst({
+    where: {
+      clerkId,
+    },
+  });
+
+  return userInfo;
+};
