@@ -2,7 +2,7 @@ export interface GetRoomType {
   page: number;
   limit: number;
   searchKeywords: string | undefined;
-  userId: string | undefined;
+  clerkId: string | undefined;
   isRejected: boolean;
 }
 

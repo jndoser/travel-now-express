@@ -37,10 +37,25 @@ export const createRoom = async (room: CreateRoomType) => {
 export const getRooms = async (getRoomData: GetRoomType) => {
   try {
     const skip = (getRoomData.page - 1) * getRoomData.limit;
+    let userId: string | undefined;
+    if (getRoomData.clerkId) {
+      const userInfo = await prisma.user.findFirst({
+        where: {
+          clerkId: getRoomData.clerkId,
+        },
+      });
+      if (userInfo) {
+        userId = userInfo.id;
+      } else {
+        userId = undefined;
+      }
+    } else {
+      userId = undefined;
+    }
 
     const rooms = await prisma.room.findMany({
       where: {
-        ...(getRoomData.userId ? { ownerId: getRoomData.userId } : {}),
+        ...(userId ? { ownerId: userId } : {}),
         ...(getRoomData.searchKeywords
           ? { title: { contains: getRoomData.searchKeywords } }
           : {}),
@@ -53,7 +68,16 @@ export const getRooms = async (getRoomData: GetRoomType) => {
       },
     });
 
-    const totalRoom = (await prisma.room.findMany({})).length;
+    const totalRoom = (
+      await prisma.room.findMany({
+        where: {
+          ...(userId ? { ownerId: userId } : {}),
+          ...(getRoomData.searchKeywords
+            ? { title: { contains: getRoomData.searchKeywords } }
+            : {}),
+        },
+      })
+    ).length;
 
     return { rooms, total: totalRoom };
   } catch (error: any) {
@@ -109,40 +133,45 @@ export const updateRoom = async (
   if (!existingRoom) {
     throw new HttpException(404, "This room does not exist");
   }
-
-  const room = await prisma.room.update({
-    where: {
-      id,
-    },
-    data: {
-      ...(updateRoomData.title ? { title: updateRoomData.title } : {}),
-      ...(updateRoomData.description
-        ? { description: updateRoomData.description }
-        : {}),
-      ...(updateRoomData.address ? { address: updateRoomData.address } : {}),
-      ...(updateRoomData.capacity ? { capacity: updateRoomData.capacity } : {}),
-      ...(updateRoomData.price ? { price: updateRoomData.price } : {}),
-      ...(updateRoomData.imageUrls
-        ? { imageUrls: updateRoomData.imageUrls }
-        : {}),
-      status: "in progress",
-      ...(updateRoomData.ownerId ? { ownerId: updateRoomData.ownerId } : {}),
-      services: {
-        connect: updateRoomData.serviceIDs
-          ? updateRoomData.serviceIDs.map((id) => ({ id }))
-          : [],
-        disconnect:
-          existingRoom.serviceIDs && updateRoomData.serviceIDs
-            ? existingRoom.serviceIDs
-                .filter((service) =>
-                  updateRoomData.serviceIDs?.includes(service)
-                )
-                .map((service) => ({ id: service }))
-            : [],
+  try {
+    const room = await prisma.room.update({
+      where: {
+        id,
       },
-    },
-  });
-  return room;
+      data: {
+        ...(updateRoomData.title ? { title: updateRoomData.title } : {}),
+        ...(updateRoomData.description
+          ? { description: updateRoomData.description }
+          : {}),
+        ...(updateRoomData.address ? { address: updateRoomData.address } : {}),
+        ...(updateRoomData.capacity
+          ? { capacity: updateRoomData.capacity }
+          : {}),
+        ...(updateRoomData.price ? { price: updateRoomData.price } : {}),
+        ...(updateRoomData.imageUrls
+          ? { imageUrls: updateRoomData.imageUrls }
+          : {}),
+        status: "in progress",
+        ...(updateRoomData.ownerId ? { ownerId: updateRoomData.ownerId } : {}),
+        services: {
+          connect: updateRoomData.serviceIDs
+            ? updateRoomData.serviceIDs.map((id) => ({ id }))
+            : [],
+          disconnect:
+            existingRoom.serviceIDs && updateRoomData.serviceIDs
+              ? existingRoom.serviceIDs
+                  .filter((service) =>
+                    !updateRoomData.serviceIDs?.includes(service)
+                  )
+                  .map((service) => ({ id: service }))
+              : [],
+        },
+      },
+    });
+    return room;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const deleteRoom = async (id: string) => {

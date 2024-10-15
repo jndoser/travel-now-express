@@ -26,7 +26,7 @@ router.get("/room", async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 6;
     const searchKeywords = req.query.searchKeywords as string;
-    const userId = req.query.userId as string;
+    const clerkId = req.query.clerkId as string;
 
     const isRejectedParam = req.query.isRejected as string;
     const isRejected = isRejectedParam === "true";
@@ -35,7 +35,7 @@ router.get("/room", async (req: Request, res: Response) => {
       page,
       limit,
       searchKeywords,
-      userId,
+      clerkId,
       isRejected,
     } as GetRoomType;
 
@@ -59,7 +59,7 @@ router.get("/room/:roomId", async (req: Request, res: Response) => {
 router.put("/room/:roomId", async (req: Request, res: Response) => {
   try {
     const room = await updateRoom(req.params.roomId, { ...req.body });
-    res.json(room);
+    res.status(200).json(room);
   } catch (error: any) {
     res.status(error.errorCode).json({ message: error.message });
   }
