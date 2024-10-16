@@ -160,8 +160,8 @@ export const updateRoom = async (
           disconnect:
             existingRoom.serviceIDs && updateRoomData.serviceIDs
               ? existingRoom.serviceIDs
-                  .filter((service) =>
-                    !updateRoomData.serviceIDs?.includes(service)
+                  .filter(
+                    (service) => !updateRoomData.serviceIDs?.includes(service)
                   )
                   .map((service) => ({ id: service }))
               : [],
@@ -232,4 +232,28 @@ export const unsaveRoom = async (unsavedRoomData: UnsavedRoomType) => {
     });
     return updatedRoom;
   }
+};
+
+export const approveRoom = async (roomId: string) => {
+  const roomToUpdate = await prisma.room.findFirst({ where: { id: roomId } });
+  if (!roomToUpdate) {
+    throw new HttpException(404, "Room not found");
+  }
+  const newRoom = await prisma.room.update({
+    where: { id: roomId },
+    data: { status: "approved" },
+  });
+  return newRoom;
+};
+
+export const rejectRoom = async (roomId: string) => {
+  const roomToUpdate = await prisma.room.findFirst({ where: { id: roomId } });
+  if (!roomToUpdate) {
+    throw new HttpException(404, "Room not found");
+  }
+  const newRoom = await prisma.room.update({
+    where: { id: roomId },
+    data: { status: "rejected" },
+  });
+  return newRoom;
 };

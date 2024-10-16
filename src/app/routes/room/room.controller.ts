@@ -1,9 +1,11 @@
 import { Request, Response, Router } from "express";
 import {
+  approveRoom,
   createRoom,
   deleteRoom,
   getRoomById,
   getRooms,
+  rejectRoom,
   saveRoom,
   unsaveRoom,
   updateRoom,
@@ -88,6 +90,16 @@ router.put("/room/unsave/:roomId", async (req: Request, res: Response) => {
     clerkId: req.body.clerkId,
   });
   res.status(200).json(unsavedRoom);
+});
+
+router.put("/room/approve/:roomId", async (req: Request, res: Response) => {
+  const approvedRoom = await approveRoom(req.params.roomId);
+  res.status(200).json(approvedRoom);
+});
+
+router.put("/room/reject/:roomId", async (req: Request, res: Response) => {
+  const rejectedRoom = await rejectRoom(req.params.roomId);
+  res.status(200).json(rejectedRoom);
 });
 
 export default router;
