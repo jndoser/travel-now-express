@@ -14,6 +14,7 @@ export interface GetBookingHistoryType {
 
 export interface GetBookedInfoType {
   roomId: string;
+  status: string;
   page: number;
   limit: number;
   searchKeywords: string | undefined;

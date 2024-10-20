@@ -61,7 +61,7 @@ export const createBookedRoom = async (
         userId: user.id,
         numberOfPeople: createBookedRoomData.numberOfPeople,
         bookedDate: createBookedRoomData.bookedDate,
-        status: "Pending Approval"
+        status: "Pending Approval",
       },
     });
     return newBookedRoom;
@@ -83,7 +83,10 @@ export const getBookedDataByRoomId = async (
   try {
     const skip = (getBookedInfoData.page - 1) * getBookedInfoData.limit;
     const bookedData = await prisma.booking.findMany({
-      where: { roomId: getBookedInfoData.roomId },
+      where: {
+        roomId: getBookedInfoData.roomId,
+        status: getBookedInfoData.status,
+      },
       include: { user: true },
       skip,
       take: getBookedInfoData.limit,
@@ -99,4 +102,34 @@ export const getBookedDataByRoomId = async (
   } catch (error) {
     throw new HttpException(500, "Something went wrong");
   }
+};
+
+export const approveBookedRoom = async (bookingId: string) => {
+  const bookingInfo = await prisma.booking.findUnique({
+    where: { id: bookingId },
+  });
+  if (!bookingInfo) {
+    throw new HttpException(404, "Booking info not found");
+  }
+  const updatedBookingInfo = await prisma.booking.update({
+    where: { id: bookingId },
+    data: { status: "Approved" },
+  });
+
+  return { ...updatedBookingInfo };
+};
+
+export const rejectBookedRoom = async (bookingId: string) => {
+  const bookingInfo = await prisma.booking.findUnique({
+    where: { id: bookingId },
+  });
+  if (!bookingInfo) {
+    throw new HttpException(404, "Booking info not found");
+  }
+  const updatedBookingInfo = await prisma.booking.update({
+    where: { id: bookingId },
+    data: { status: "Rejected" },
+  });
+
+  return { ...updatedBookingInfo };
 };

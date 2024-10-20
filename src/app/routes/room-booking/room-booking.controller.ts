@@ -1,8 +1,10 @@
 import { Request, Response, Router } from "express";
 import {
+  approveBookedRoom,
   createBookedRoom,
   getBookedDataByRoomId,
   getBookingRoomByUserId,
+  rejectBookedRoom,
 } from "./room-booking.service";
 import { GetBookedInfoType, GetBookingHistoryType } from "./room-booking.model";
 
@@ -36,15 +38,33 @@ router.get("/room/booking/:roomId", async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 6;
   const searchKeywords = req.query.searchKeywords as string;
+  const status = req.query.status as string;
 
   const getBookedInfoInput = {
     roomId: req.params.roomId,
     page,
     limit,
     searchKeywords,
+    status,
   } as GetBookedInfoType;
   const bookedData = await getBookedDataByRoomId(getBookedInfoInput);
   res.status(200).json(bookedData);
 });
+
+router.put(
+  "/room/booking/approve/:bookingId",
+  async (req: Request, res: Response) => {
+    const updatedBookingInfo = await approveBookedRoom(req.params.bookingId);
+    res.status(200).json(updatedBookingInfo);
+  }
+);
+
+router.put(
+  "/room/booking/reject/:bookingId",
+  async (req: Request, res: Response) => {
+    const updatedBookingInfo = await rejectBookedRoom(req.params.bookingId);
+    res.status(200).json(updatedBookingInfo);
+  }
+);
 
 export default router;
