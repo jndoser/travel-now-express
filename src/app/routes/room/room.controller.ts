@@ -30,15 +30,14 @@ router.get("/room", async (req: Request, res: Response) => {
     const searchKeywords = req.query.searchKeywords as string;
     const clerkId = req.query.clerkId as string;
 
-    const isRejectedParam = req.query.isRejected as string;
-    const isRejected = isRejectedParam === "true";
+    const status = req.query.status as string;
 
     const getRoomData = {
       page,
       limit,
       searchKeywords,
       clerkId,
-      isRejected,
+      status,
     } as GetRoomType;
 
     const rooms = await getRooms(getRoomData);

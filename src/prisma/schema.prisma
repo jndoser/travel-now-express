@@ -27,6 +27,7 @@ model User {
   rooms Room[]
   savedRoomIds String[] @db.ObjectId
   savedRooms Room[] @relation("room-saving", fields: [savedRoomIds], references: [id])
+  bookings Booking[]
 }
 
 model Room {
@@ -45,6 +46,7 @@ model Room {
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   savedUserIds String[] @db.ObjectId
   savedUsers User[] @relation("room-saving", fields: [savedUserIds], references: [id])
+  bookings Booking[]
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
@@ -67,4 +69,15 @@ model Feedback {
   comment String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+}
+
+model Booking {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  roomId String @db.ObjectId
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  numberOfPeople Int
+  bookedDate DateTime
+  status String
 }

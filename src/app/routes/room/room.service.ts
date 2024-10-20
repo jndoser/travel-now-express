@@ -55,6 +55,7 @@ export const getRooms = async (getRoomData: GetRoomType) => {
 
     const rooms = await prisma.room.findMany({
       where: {
+        status: getRoomData.status,
         ...(userId ? { ownerId: userId } : {}),
         ...(getRoomData.searchKeywords
           ? { title: { contains: getRoomData.searchKeywords } }
@@ -71,6 +72,7 @@ export const getRooms = async (getRoomData: GetRoomType) => {
     const totalRoom = (
       await prisma.room.findMany({
         where: {
+          status: getRoomData.status,
           ...(userId ? { ownerId: userId } : {}),
           ...(getRoomData.searchKeywords
             ? { title: { contains: getRoomData.searchKeywords } }

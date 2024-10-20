@@ -3,7 +3,7 @@ export interface GetRoomType {
   limit: number;
   searchKeywords: string | undefined;
   clerkId: string | undefined;
-  isRejected: boolean;
+  status: string;
 }
 
 export interface CreateRoomType {

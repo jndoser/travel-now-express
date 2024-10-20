@@ -1,4 +1,5 @@
 import prisma from "../../../prisma/prisma-client";
+import HttpException from "../../models/http-exception.model";
 import { GetSavedRoomType } from "./user.model";
 
 export const getSavedRoomsByUser = async (
@@ -43,11 +44,15 @@ export const getSavedRoomsByUser = async (
 };
 
 export const getUserInfoByClerkId = async (clerkId: string) => {
-  const userInfo = await prisma.user.findFirst({
-    where: {
-      clerkId,
-    },
-  });
+  try {
+    const userInfo = await prisma.user.findFirst({
+      where: {
+        clerkId,
+      },
+    });
 
-  return userInfo;
+    return userInfo;
+  } catch (error: any) {
+    throw new HttpException(500, "Something went wrong");
+  }
 };
